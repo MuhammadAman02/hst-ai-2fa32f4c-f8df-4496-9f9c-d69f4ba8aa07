@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Premium ASICS Footwear</h1>
+                <p class="lead mb-4">Discover the perfect blend of performance, comfort, and style with our authentic ASICS collection. From running to tennis, find your perfect fit.</p>
+                <a href="/products" class="btn btn-light btn-lg">Shop Now <i class="fas fa-arrow-right ms-2"></i></a>
+            </div>
+            <div class="col-lg-6">
+                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=400&fit=crop" 
+                     alt="ASICS Running Shoes" class="img-fluid rounded shadow">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <i class="fas fa-shipping-fast fa-3x text-primary mb-3"></i>
+                        <h5>Free Shipping</h5>
+                        <p class="text-muted">Free shipping on orders over $100</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <i class="fas fa-undo fa-3x text-primary mb-3"></i>
+                        <h5>Easy Returns</h5>
+                        <p class="text-muted">30-day hassle-free returns</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <i class="fas fa-certificate fa-3x text-primary mb-3"></i>
+                        <h5>Authentic Products</h5>
+                        <p class="text-muted">100% genuine ASICS products</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Featured Products</h2>
+            <p class="text-muted">Discover our most popular ASICS shoes</p>
+        </div>
+        
+        <div class="row">
+            {% for product in products %}
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm product-card">
+                    <div class="position-relative">
+                        <img src="{{ product.image_url or 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop' }}" 
+                             class="card-img-top" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
+                        {% if product.is_featured %}
+                        <span class="badge bg-warning position-absolute top-0 start-0 m-2">Featured</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h6 class="card-title">{{ product.name }}</h6>
+                        <p class="card-text text-muted small flex-grow-1">{{ product.description[:100] }}...</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 text-primary mb-0">${{ "%.2f"|format(product.price) }}</span>
+                            <small class="text-muted">{{ product.size }}</small>
+                        </div>
+                        <div class="mt-3">
+                            <a href="/product/{{ product.id }}" class="btn btn-outline-primary btn-sm me-2">View Details</a>
+                            <button class="btn btn-primary btn-sm" onclick="addToCart({{ product.id }})">
+                                <i class="fas fa-cart-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="/products" class="btn btn-primary btn-lg">View All Products</a>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="py-5 bg-dark text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h3>Stay Updated</h3>
+                <p>Get the latest news about new arrivals and exclusive offers.</p>
+            </div>
+            <div class="col-lg-6">
+                <div class="input-group">
+                    <input type="email" class="form-control" placeholder="Enter your email">
+                    <button class="btn btn-primary" type="button">Subscribe</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function addToCart(productId) {
+    fetch('/api/cart/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `product_id=${productId}&quantity=1`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Product added to cart!');
+            // Update cart badge
+            updateCartBadge();
+        } else {
+            alert('Error adding product to cart');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error adding product to cart');
+    });
+}
+
+function updateCartBadge() {
+    // In a real app, you'd fetch the actual cart count
+    const badge = document.querySelector('.badge');
+    if (badge) {
+        const currentCount = parseInt(badge.textContent) || 0;
+        badge.textContent = currentCount + 1;
+    }
+}
+</script>
+{% endblock %}
